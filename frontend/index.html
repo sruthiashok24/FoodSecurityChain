@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Farm2Fork | Food Security Blockchain</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#f4f7f4;color:#1a2e1a;min-height:100vh;padding:40px 20px}
+    .header{text-align:center;margin-bottom:44px}
+    .header h1{font-size:36px;color:#1b5e20;letter-spacing:3px;font-weight:700;margin-bottom:10px}
+    .header p{font-size:13px;color:#4a6e4a;max-width:500px;margin:0 auto;line-height:1.8}
+    .header .tagline{font-size:11px;color:#2e7d32;margin-top:8px;letter-spacing:2px;font-family:'DM Mono',monospace}
+    .flow-bar{display:flex;align-items:center;justify-content:center;gap:0;max-width:700px;margin:0 auto 44px;flex-wrap:wrap}
+    .flow-step{text-align:center;padding:8px 12px}
+    .flow-icon{font-size:20px;margin-bottom:4px}
+    .flow-label{font-size:10px;color:#4a6e4a;letter-spacing:1px;font-weight:600}
+    .flow-arrow{color:#2e7d32;font-size:18px;margin:0 4px;margin-bottom:16px;font-weight:700}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:900px;margin:0 auto 40px}
+    .portal-card{border-radius:14px;padding:28px 20px;text-align:center;cursor:pointer;text-decoration:none;display:block;transition:transform .2s,box-shadow .2s;border:1.5px solid transparent}
+    .portal-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.12)}
+    .card-farmer{background:#e8f5e9;border-color:#a5d6a7}
+    .card-inspector{background:#e3f2fd;border-color:#90caf9}
+    .card-distributor{background:#fff3e0;border-color:#ffcc80}
+    .card-retailer{background:#f3e5f5;border-color:#ce93d8}
+    .card-consumer{background:#e0f2f1;border-color:#80cbc4}
+    .card-icon{font-size:36px;margin-bottom:14px}
+    .card-role{font-size:11px;letter-spacing:2px;margin-bottom:6px;font-weight:700;font-family:'DM Mono',monospace}
+    .card-title{font-size:18px;font-weight:700;margin-bottom:8px}
+    .card-desc{font-size:12px;line-height:1.7;margin-bottom:16px;color:#4a6e4a}
+    .card-btn{display:inline-block;padding:8px 20px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:1px}
+    .farmer-color{color:#1b5e20}
+    .inspector-color{color:#0d47a1}
+    .distributor-color{color:#bf360c}
+    .retailer-color{color:#4a148c}
+    .consumer-color{color:#004d40}
+    .farmer-btn{background:#1b5e20;color:#fff}
+    .inspector-btn{background:#0d47a1;color:#fff}
+    .distributor-btn{background:#e65100;color:#fff}
+    .retailer-btn{background:#4a148c;color:#fff}
+    .consumer-btn{background:#00695c;color:#fff}
+    .info-bar{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:40px}
+    .info-item{background:#fff;border:1.5px solid #c8e6c9;border-radius:10px;padding:14px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+    .info-value{font-size:22px;font-weight:700;color:#1b5e20;margin-bottom:4px;font-family:'DM Mono',monospace}
+    .info-label{font-size:11px;color:#4a6e4a;letter-spacing:1px;font-weight:600}
+    .footer{text-align:center;color:#2e7d32;font-size:11px;letter-spacing:2px;margin-top:20px;font-family:'DM Mono',monospace}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌾 FARM2FORK</h1>
+    <p>A blockchain-based food security system that tracks every grain of food from the farmer's field to the consumer's plate — tamper-proof, transparent, and immutable.</p>
+    <div class="tagline">POWERED BY ETHEREUM · GANACHE · SOLIDITY · WEB3.JS</div>
+  </div>
+  <div class="flow-bar">
+    <div class="flow-step"><div class="flow-icon">🌾</div><div class="flow-label" style="color:#1b5e20">FARMER</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">🔬</div><div class="flow-label" style="color:#0d47a1">INSPECTOR</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">🚚</div><div class="flow-label" style="color:#bf360c">DISTRIBUTOR</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">🏪</div><div class="flow-label" style="color:#4a148c">RETAILER</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">👤</div><div class="flow-label" style="color:#004d40">CONSUMER</div></div>
+  </div>
+  <div class="info-bar">
+    <div class="info-item"><div class="info-value" id="totalBatches">...</div><div class="info-label">TOTAL BATCHES</div></div>
+    <div class="info-item"><div class="info-value" style="color:#0d47a1" id="network">5777</div><div class="info-label">NETWORK ID</div></div>
+    <div class="info-item"><div class="info-value" style="color:#bf360c" id="blockNum">...</div><div class="info-label">BLOCK NUMBER</div></div>
+    <div class="info-item"><div class="info-value" style="color:#4a148c">LOCAL</div><div class="info-label">BLOCKCHAIN</div></div>
+  </div>
+  <div class="grid">
+    <a href="farmer.html" class="portal-card card-farmer">
+      <div class="card-icon">🌾</div>
+      <div class="card-role farmer-color">STEP 1</div>
+      <div class="card-title farmer-color">Farmer</div>
+      <div class="card-desc">Register your food batch on blockchain. Enter crop details, quantity, price and harvest date.</div>
+      <span class="card-btn farmer-btn">Open Portal →</span>
+    </a>
+    <a href="inspector.html" class="portal-card card-inspector">
+      <div class="card-icon">🔬</div>
+      <div class="card-role inspector-color">STEP 2</div>
+      <div class="card-title inspector-color">Inspector</div>
+      <div class="card-desc">Verify food quality. Approve or reject harvested batches before they enter the supply chain.</div>
+      <span class="card-btn inspector-btn">Open Portal →</span>
+    </a>
+    <a href="distributor.html" class="portal-card card-distributor">
+      <div class="card-icon">🚚</div>
+      <div class="card-role distributor-color">STEP 3</div>
+      <div class="card-title distributor-color">Distributor</div>
+      <div class="card-desc">Ship approved batches. Enter vehicle number and destination to update transport status.</div>
+      <span class="card-btn distributor-btn">Open Portal →</span>
+    </a>
+    <a href="retailer.html" class="portal-card card-retailer">
+      <div class="card-icon">🏪</div>
+      <div class="card-role retailer-color">STEP 4</div>
+      <div class="card-title retailer-color">Retailer</div>
+      <div class="card-desc">Confirm delivery of shipped batches. Mark food as received at your store.</div>
+      <span class="card-btn retailer-btn">Open Portal →</span>
+    </a>
+    <a href="consumer.html" class="portal-card card-consumer">
+      <div class="card-icon">👤</div>
+      <div class="card-role consumer-color">TRACK</div>
+      <div class="card-title consumer-color">Consumer</div>
+      <div class="card-desc">Track any food batch by ID. See the complete farm-to-fork journey on blockchain.</div>
+      <span class="card-btn consumer-btn">Open Portal →</span>
+    </a>
+  </div>
+  <div class="footer">TAMPER-PROOF · IMMUTABLE · TRANSPARENT · ON-CHAIN</div>
+  <script src="./web3.min.js"></script>
+  <script>
+    const CONTRACT_ADDRESS = "0xC771a68c1A77b111bB6512D9e6764F6a7371B19A";
+    const ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"batchCount","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+    async function init() {
+      try {
+        const web3 = new Web3("http://127.0.0.1:7545");
+        const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+        const count = await contract.methods.batchCount().call();
+        const block = await web3.eth.getBlockNumber();
+        document.getElementById("totalBatches").textContent = count;
+        document.getElementById("blockNum").textContent = block;
+      } catch(e) {
+        document.getElementById("totalBatches").textContent = "—";
+        document.getElementById("blockNum").textContent = "—";
+      }
+    }
+    init();
+  </script>
+</body>
+</html>

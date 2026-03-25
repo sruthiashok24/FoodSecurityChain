@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Inspector Portal | Farm2Fork</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'DM Sans',sans-serif;background:#f0f4fa;color:#0a1628;min-height:100vh;padding:30px 20px}
+    .header{text-align:center;margin-bottom:24px}
+    .header h1{font-size:26px;color:#0d47a1;letter-spacing:2px;font-weight:700}
+    .header p{color:#3a5a8a;font-size:12px;margin-top:5px}
+    .back-link{display:inline-block;margin-bottom:12px;font-size:12px;color:#0d47a1;text-decoration:none;font-weight:600}
+    .back-link:hover{text-decoration:underline}
+    .account-bar{text-align:center;font-size:11px;color:#3a5a8a;margin-bottom:16px;font-family:'DM Mono',monospace;background:#e3f2fd;border:1px solid #90caf9;border-radius:6px;padding:6px;max-width:540px;margin:0 auto 16px}
+    .account-bar span{color:#0d47a1;font-weight:600}
+    .card{background:#fff;border:1.5px solid #90caf9;border-radius:12px;padding:20px;max-width:540px;margin:0 auto 12px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+    .card h2{font-size:13px;color:#0d47a1;margin-bottom:16px;border-bottom:1.5px solid #bbdefb;padding-bottom:8px;letter-spacing:1px;font-weight:700;text-transform:uppercase;font-family:'DM Mono',monospace}
+    .batch-item{background:#f8fbff;border:1.5px solid #bbdefb;border-radius:8px;padding:14px;margin-bottom:12px}
+    .bid{font-size:11px;color:#0d47a1;font-weight:700;letter-spacing:1px;margin-bottom:4px;font-family:'DM Mono',monospace}
+    .bname{font-size:15px;font-weight:700;color:#0a1628;margin-bottom:3px}
+    .bdetail{font-size:12px;color:#3a5a8a;line-height:1.7}
+    .bts{font-size:11px;color:#0d47a1;margin-top:6px;font-family:'DM Mono',monospace;background:#e3f2fd;padding:4px 8px;border-radius:4px;display:inline-block}
+    .badge{display:inline-block;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;margin-top:8px;margin-bottom:10px;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+    .action-row{display:flex;gap:8px;margin-top:10px}
+    .btn-approve{flex:1;padding:9px;background:#1565c0;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;font-family:'DM Sans',sans-serif;transition:background .2s}
+    .btn-approve:hover{background:#0d47a1}
+    .btn-reject{flex:1;padding:9px;background:#c62828;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;font-family:'DM Sans',sans-serif;transition:background .2s}
+    .btn-reject:hover{background:#b71c1c}
+    .status{text-align:center;margin-top:10px;font-size:12px;min-height:18px;font-weight:600}
+    .success{color:#0d47a1}.error{color:#c62828}.loading{color:#e65100}
+    .empty{text-align:center;color:#3a5a8a;font-size:13px;padding:20px}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔬 FARM2FORK</h1>
+    <p>Inspector Portal — Verify Food Quality on Blockchain</p>
+  </div>
+  <div style="text-align:center"><a class="back-link" href="index.html">← Back to Home</a></div>
+  <div class="account-bar">Connected: <span id="accountAddr">Loading...</span></div>
+  <div class="card">
+    <h2>Pending Batches — Awaiting Inspection</h2>
+    <div id="batchList"><div class="empty">Loading batches...</div></div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="./web3.min.js"></script>
+  <script>
+    const CONTRACT_ADDRESS = "0xC771a68c1A77b111bB6512D9e6764F6a7371B19A";
+    const ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"batchId","type":"uint256"},{"indexed":false,"name":"cropType","type":"string"},{"indexed":false,"name":"farmerName","type":"string"},{"indexed":false,"name":"location","type":"string"},{"indexed":false,"name":"quantity","type":"uint256"},{"indexed":false,"name":"price","type":"uint256"},{"indexed":false,"name":"harvestDate","type":"string"}],"name":"BatchCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"batchId","type":"uint256"},{"indexed":false,"name":"inspector","type":"address"}],"name":"BatchApproved","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"batchId","type":"uint256"},{"indexed":false,"name":"inspector","type":"address"}],"name":"BatchRejected","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"batchId","type":"uint256"},{"indexed":false,"name":"vehicleNumber","type":"string"},{"indexed":false,"name":"destination","type":"string"}],"name":"BatchShipped","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"batchId","type":"uint256"},{"indexed":false,"name":"retailerName","type":"string"}],"name":"BatchDelivered","type":"event"},{"inputs":[{"name":"_cropType","type":"string"},{"name":"_farmerName","type":"string"},{"name":"_location","type":"string"},{"name":"_quantity","type":"uint256"},{"name":"_price","type":"uint256"},{"name":"_harvestDate","type":"string"}],"name":"createBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_id","type":"uint256"}],"name":"approveBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_id","type":"uint256"}],"name":"rejectBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_id","type":"uint256"},{"name":"_vehicleNumber","type":"string"},{"name":"_destination","type":"string"}],"name":"shipBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_id","type":"uint256"},{"name":"_retailerName","type":"string"}],"name":"deliverBatch","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_id","type":"uint256"}],"name":"getBatch","outputs":[{"components":[{"name":"id","type":"uint256"},{"name":"cropType","type":"string"},{"name":"farmerName","type":"string"},{"name":"location","type":"string"},{"name":"quantity","type":"uint256"},{"name":"price","type":"uint256"},{"name":"harvestDate","type":"string"},{"name":"state","type":"uint8"},{"name":"vehicleNumber","type":"string"},{"name":"destination","type":"string"},{"name":"retailerName","type":"string"},{"name":"exists","type":"bool"}],"name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"name":"_id","type":"uint256"}],"name":"getStateString","outputs":[{"name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"batchCount","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+
+    let web3, contract, accounts;
+
+    function fmtTs(unix) {
+      if (!unix) return "—";
+      return new Date(unix*1000).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+    }
+
+    async function getEventTimestamp(eventName, batchId) {
+      try {
+        const events = await contract.getPastEvents(eventName, {filter:{batchId:batchId},fromBlock:0,toBlock:'latest'});
+        if (events.length > 0) {
+          const block = await web3.eth.getBlock(events[0].blockNumber);
+          return block.timestamp;
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    async function init() {
+      web3 = new Web3("http://127.0.0.1:7545");
+      accounts = await web3.eth.getAccounts();
+      contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+      document.getElementById("accountAddr").textContent = accounts[1];
+      loadBatches();
+    }
+
+    async function loadBatches() {
+      const count = await contract.methods.batchCount().call();
+      const list = document.getElementById("batchList");
+      let html = "";
+      for (let i = 1; i <= count; i++) {
+        const b = await contract.methods.getBatch(i).call();
+        if (parseInt(b.state) === 0) {
+          const ts = await getEventTimestamp('BatchCreated', i);
+          html += `
+            <div class="batch-item">
+              <div class="bid">BATCH #${b.id}</div>
+              <div class="bname">${b.cropType}</div>
+              <div class="bdetail">
+                Farmer: ${b.farmerName} | Location: ${b.location}<br>
+                Qty: ${b.quantity}kg | Price: ₹${b.price}/kg | Harvest: ${b.harvestDate}
+              </div>
+              <div class="bts">🕐 Harvested on: ${fmtTs(ts)}</div>
+              <span class="badge">Harvested</span>
+              <div class="action-row">
+                <button class="btn-approve" onclick="approve(${b.id})">✅ Approve</button>
+                <button class="btn-reject"  onclick="reject(${b.id})">❌ Reject</button>
+              </div>
+            </div>`;
+        }
+      }
+      list.innerHTML = html || `<div class="empty">No pending batches to inspect.</div>`;
+    }
+
+    async function approve(id) {
+      try {
+        setStatus("Approving on blockchain...","loading");
+        await contract.methods.approveBatch(id).send({from:accounts[1],gas:200000});
+        setStatus(`Batch #${id} approved successfully!`,"success");
+        loadBatches();
+      } catch(e) { setStatus("Error: "+e.message,"error"); }
+    }
+
+    async function reject(id) {
+      try {
+        setStatus("Rejecting on blockchain...","loading");
+        await contract.methods.rejectBatch(id).send({from:accounts[1],gas:200000});
+        setStatus(`Batch #${id} rejected.`,"success");
+        loadBatches();
+      } catch(e) { setStatus("Error: "+e.message,"error"); }
+    }
+
+    function setStatus(msg, type) {
+      const el = document.getElementById("status");
+      el.textContent = msg; el.className = "status "+type;
+    }
+
+    init();
+  </script>
+</body>
+</html>
